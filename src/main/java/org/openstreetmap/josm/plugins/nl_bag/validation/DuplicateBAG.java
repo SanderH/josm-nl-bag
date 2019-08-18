@@ -2,9 +2,6 @@ package org.openstreetmap.josm.plugins.nl_bag.validation;
 
 import static org.openstreetmap.josm.tools.I18n.tr;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -94,18 +91,32 @@ public class DuplicateBag extends Test {
             DuplicateBag tester, Entry<RefBagKey, Set<BagObjectOsmPrimitive>> entry) {
         List<OsmPrimitive> osmprimitives = new ArrayList<>(entry.getValue().size());
         RefBagKey key = entry.getKey();
+        Boolean hideFixer = false;
         for (BagObjectOsmPrimitive n : entry.getValue()) {
+        	hideFixer = hideFixer || BagUtils.isStaticCaravan(n.getOsmPrimitive()) || BagUtils.hasNoteBag(n.getOsmPrimitive());
         	osmprimitives.add(n.getOsmPrimitive());
         }
 
-        Builder builder = TestError
-                .builder(tester, Severity.ERROR, DUPLICATE_BAG)
-                .message("Duplicate BAG object",
-                        I18n.tr("Duplicate BAG object for {0}",
-                                key.getRefBAG()))
-                .primitives(osmprimitives)
-                .fix(new DuplicateBAGObjectFixer(osmprimitives));
-        return Collections.singletonList(builder.build());
+        if (hideFixer)
+        {
+            Builder builder = TestError
+                    .builder(tester, Severity.ERROR, DUPLICATE_BAG)
+                    .message("Duplicate BAG object",
+                            I18n.tr("Duplicate BAG object for {0}",
+                                    key.getRefBAG()))
+                    .primitives(osmprimitives);
+            return Collections.singletonList(builder.build());
+        }
+        else {
+            Builder builder = TestError
+                    .builder(tester, Severity.ERROR, DUPLICATE_BAG)
+                    .message("Duplicate BAG object",
+                            I18n.tr("Duplicate BAG object for {0}",
+                                    key.getRefBAG()))
+                    .primitives(osmprimitives)
+                    .fix(new DuplicateBAGObjectFixer(osmprimitives));
+            return Collections.singletonList(builder.build());
+        }
     }
 
     static class DuplicateBAGObjectFixer implements Supplier<Command> {
@@ -145,6 +156,14 @@ public class DuplicateBag extends Test {
             	return null;
             }
             
+    		if (BagUtils.isStaticCaravan(originalPrimitive) || 
+    			BagUtils.isStaticCaravan(newPrimitive) || 
+    			BagUtils.hasNoteBag(originalPrimitive))
+    		{
+    			// not going to touch objects with static_caravan and note:bag
+    			return null;
+    		}
+            
         	// phase 1
         	// update BAG-related fields
             // set source date to newest value
@@ -167,7 +186,7 @@ public class DuplicateBag extends Test {
         	// phase 2
         	// try to merge old and new objects
         	try {
-                ReplaceGeometryCommand replaceCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(n1, n2);
+                ReplaceGeometryCommand replaceCommand = ReplaceGeometryUtils.buildReplaceWithNewCommand(originalPrimitive, newPrimitive);
 
                 // action was canceled
                 if (replaceCommand == null)
@@ -208,20 +227,20 @@ public class DuplicateBag extends Test {
         	}
         	
         	// fix source:date
-            if (hasSourceDate(originalPrimitive) && hasSourceDate(newPrimitive))
+            if (BagUtils.hasSourceDate(originalPrimitive) && BagUtils.hasSourceDate(newPrimitive))
             {
-            	Date d1 = getSourceDate(originalPrimitive);
-            	Date d2 = getSourceDate(newPrimitive);
+            	Date d1 = BagUtils.getSourceDate(originalPrimitive);
+            	Date d2 = BagUtils.getSourceDate(newPrimitive);
             	
             	if (d2.before(d1))
             	{
             		Logging.trace("BAGObject fixer: Update source date, will need 2nd pass");
-                	commands.add(new ChangePropertyCommand(newPrimitive, SOURCE_DATE, originalPrimitive.get(SOURCE_DATE)));
+                	commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.SOURCE_DATE, originalPrimitive.get(BagUtils.SOURCE_DATE)));
             	}
             	else if (d1.before(d2))
             	{
             		Logging.trace("BAGObject fixer: Update source date, will need 2nd pass");
-            		commands.add(new ChangePropertyCommand(originalPrimitive, SOURCE_DATE, newPrimitive.get(SOURCE_DATE)));
+            		commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.SOURCE_DATE, newPrimitive.get(BagUtils.SOURCE_DATE)));
             	}
             	else
             	{
@@ -230,20 +249,20 @@ public class DuplicateBag extends Test {
             }
             
             // cleanup construction tag if needed
-        	String buildingValueTag = BUILDING;
-            if (isConstruction(originalPrimitive) && !isConstruction(newPrimitive))
+        	String buildingValueTag = BagUtils.BUILDING;
+            if (BagUtils.isConstruction(originalPrimitive) && !BagUtils.isConstruction(newPrimitive))
             {
             	// remove tag
-            	commands.add(new ChangePropertyCommand(originalPrimitive, CONSTRUCTION, null));
+            	commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.CONSTRUCTION, null));
             	
             	// set property source for next test
-        		buildingValueTag = CONSTRUCTION;
+        		buildingValueTag = BagUtils.CONSTRUCTION;
             }
             
             // fix (retain/update) building tag
             if (isBuilding(originalPrimitive) && isBuilding(newPrimitive))
             {
-        		if (!originalPrimitive.get(buildingValueTag).equals(newPrimitive.get(BUILDING)))
+        		if (!originalPrimitive.get(buildingValueTag).equals(newPrimitive.get(BagUtils.BUILDING)))
         		{
 	            	switch (originalPrimitive.get(buildingValueTag))
 	            	{
@@ -267,41 +286,41 @@ public class DuplicateBag extends Test {
 		            	case "hotel":
 		            	case "hangar":
 		            		// this custom value is probably better than BAG, so retain value
-		            		if (buildingValueTag.equals(CONSTRUCTION))
+		            		if (buildingValueTag.equals(BagUtils.CONSTRUCTION))
 		            		{
 		            			// promote construction value to building
-		            			commands.add(new ChangePropertyCommand(originalPrimitive, BUILDING, originalPrimitive.get(CONSTRUCTION)));
-		            			commands.add(new ChangePropertyCommand(newPrimitive, BUILDING, originalPrimitive.get(CONSTRUCTION)));
+		            			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.CONSTRUCTION)));
+		            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.CONSTRUCTION)));
 		            		}
 		            		else
 		            		{
 		            			// use existing value
-		            			commands.add(new ChangePropertyCommand(newPrimitive, BUILDING, originalPrimitive.get(BUILDING)));
+		            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.BUILDING)));
 		            		}
 		            		break;
 		            	default:
 		            		// use new value
-	            			commands.add(new ChangePropertyCommand(originalPrimitive, BUILDING, newPrimitive.get(BUILDING)));
+	            			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, newPrimitive.get(BagUtils.BUILDING)));
 		            		break;
 	            	}
         		}
             }
             
             // fix start_date tag
-            if (hasStartDate(originalPrimitive) && hasStartDate(newPrimitive))
+            if (BagUtils.hasStartDate(originalPrimitive) && BagUtils.hasStartDate(newPrimitive))
             {
-            	if (!originalPrimitive.get(START_DATE).equals(newPrimitive.get(START_DATE)))
+            	if (!originalPrimitive.get(BagUtils.START_DATE).equals(newPrimitive.get(BagUtils.START_DATE)))
             	{
-            		commands.add(new ChangePropertyCommand(originalPrimitive, START_DATE, newPrimitive.get(START_DATE)));
+            		commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.START_DATE, newPrimitive.get(BagUtils.START_DATE)));
             	}
             }
             
             // fix source tag
-            if (hasSource(originalPrimitive) && hasSource(newPrimitive))
+            if (BagUtils.hasSource(originalPrimitive) && BagUtils.hasSource(newPrimitive))
             {
-            	if (!originalPrimitive.get(SOURCE).equals(newPrimitive.get(SOURCE)))
+            	if (!originalPrimitive.get(BagUtils.SOURCE).equals(newPrimitive.get(BagUtils.SOURCE)))
             	{
-            		commands.add(new ChangePropertyCommand(originalPrimitive, SOURCE, newPrimitive.get(SOURCE)));
+            		commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.SOURCE, newPrimitive.get(BagUtils.SOURCE)));
             	}
             }
             
@@ -311,61 +330,6 @@ public class DuplicateBag extends Test {
             }
             else
             	return null;
-        }
-        
-        final static String SOURCE_DATE = "source:date";
-        public static boolean hasSourceDate(OsmPrimitive osm) {
-       		return osm.hasKey(SOURCE_DATE) && isDateValid(osm.get(SOURCE_DATE));
-        }
-        
-        final static String DATE_FORMAT = "yyyy-MM-dd";
-        public static boolean isDateValid(String date) 
-        {
-            try {
-                DateFormat df = new SimpleDateFormat(DATE_FORMAT);
-                df.setLenient(false);
-                df.parse(date);
-                return true;
-            } catch (ParseException e) {
-                return false;
-            }
-        }
-        
-        public static Date getSourceDate(OsmPrimitive osm)
-        {
-        	return getDate(osm.get(SOURCE_DATE));
-        }
-        
-        public static Date getDate(String date) 
-        {
-            try {
-                DateFormat df = new SimpleDateFormat(DATE_FORMAT);
-                df.setLenient(false);
-                return df.parse(date);
-            } catch (ParseException e) {
-                return null;
-            }
-        }
-        
-        final static String CONSTRUCTION = "construction";
-        public static boolean isConstruction(OsmPrimitive osm) {
-        	return osm.hasKey(CONSTRUCTION);
-        }
-        
-        final static String BUILDING = "building";
-        public static boolean isBuilding(OsmPrimitive osm) {
-        	return osm.hasKey(BUILDING);
-        }
-        
-        final static String START_DATE = "start_date";
-        public static boolean hasStartDate(OsmPrimitive osm) {
-        	return osm.hasKey(START_DATE);
-        }
-        
-        
-        final static String SOURCE = "source";
-        public static boolean hasSource(OsmPrimitive osm) {
-        	return osm.hasKey(SOURCE);
         }
 
     }

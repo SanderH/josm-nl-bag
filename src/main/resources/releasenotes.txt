@@ -1,4 +1,7 @@
 
+2019-08-18  0.6
+*Fix:   Don't offer to fix static_caravan and note:BAG
+
 2019-08-08  0.5
 *Fix:   Promote duplicate BAG Objects duplicates from WARNING to ERROR
 +New:   Added Remote Control load_bag command to download OSM and BAG data using BAG plugin
