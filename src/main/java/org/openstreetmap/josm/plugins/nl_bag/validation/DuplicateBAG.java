@@ -323,9 +323,26 @@ public class DuplicateBag extends Test {
 			            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.BUILDING)));
 			            		}
 			            		break;
+			            	case "house":
+			            	case "apartments":
+			            	case "office":
+			            	case "industrial":
+			            	case "retail":
+			            		if (buildingValueTag.equals(BagUtils.CONSTRUCTION))
+			            		{
+			            			// promote construction value to building
+			            			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.CONSTRUCTION)));
+			            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.CONSTRUCTION)));
+			            		}
+			            		else
+			            		{
+				            		// use new value
+			            			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, newPrimitive.get(BagUtils.BUILDING)));
+			            		}
+			            		break;
 			            	default:
-			            		// use new value
-		            			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, newPrimitive.get(BagUtils.BUILDING)));
+			            		// handle difference manually
+		            			//commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, newPrimitive.get(BagUtils.BUILDING)));
 			            		break;
 		            	}
         			}
