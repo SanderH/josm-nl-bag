@@ -274,14 +274,18 @@ public class DuplicateBag extends Test {
 		            	switch (originalPrimitive.get(buildingValueTag))
 		            	{
 			            	case "barn":
+			            	case "bungalow":
 			            	case "bunker":
 			            	case "castle":
+			            	case "cathedral":
 			            	case "chapel":
 			            	case "church":
 			            	case "civic":
 			            	case "college":
+			            	case "dormitory":
 			            	case "farm":
 			            	case "farm_auxiliary":
+			            	case "fire_station":
 			            	case "garage":
 			            	case "garages":
 			            	case "government":
@@ -290,12 +294,20 @@ public class DuplicateBag extends Test {
 			            	case "hospital":
 			            	case "hotel":
 			            	case "hut":
+			            	case "kindergarten":
+			            	case "monastery":
 			            	case "mosque":
+			            	case "prison":
 			            	case "school":
+			            	case "service":
 			            	case "shed":
 			            	case "stable":
+			            	case "stadium":
 			            	case "storage_tank":
 			            	case "supermarket":
+			            	case "synagogue":
+			            	case "temple":
+			            	case "train_station":
 			            	case "university":
 			            	case "warehouse":
 		            		// this custom value is probably better than BAG, so retain value
