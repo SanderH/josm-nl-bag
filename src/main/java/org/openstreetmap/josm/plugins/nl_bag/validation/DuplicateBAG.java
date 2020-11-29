@@ -264,45 +264,59 @@ public class DuplicateBag extends Test {
             {
         		if (!originalPrimitive.get(buildingValueTag).equals(newPrimitive.get(BagUtils.BUILDING)))
         		{
-	            	switch (originalPrimitive.get(buildingValueTag))
-	            	{
-		            	case "greenhouse":
-		            	case "shed":
-		            	case "barn":
-		            	case "stable":
-		            	case "garage":
-		            	case "garages":
-		            	case "farm":
-		            	case "farm_auxiliary":
-		            	case "church":
-		            	case "chapel":
-		            	case "mosque":
-		            	case "warehouse":
-		            	case "university":
-		            	case "college":
-		            	case "school":
-		            	case "storage_tank":
-		            	case "hospital":
-		            	case "hotel":
-		            	case "hangar":
+        			if (newPrimitive.get(BagUtils.BUILDING).equals(BagUtils.YES))
+        			{
+        				// always use existing value if new value is 'yes'
+            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.BUILDING)));
+        			}
+        			else 
+        			{
+		            	switch (originalPrimitive.get(buildingValueTag))
+		            	{
+			            	case "barn":
+			            	case "bunker":
+			            	case "castle":
+			            	case "chapel":
+			            	case "church":
+			            	case "civic":
+			            	case "college":
+			            	case "farm":
+			            	case "farm_auxiliary":
+			            	case "garage":
+			            	case "garages":
+			            	case "government":
+			            	case "greenhouse":
+			            	case "hangar":
+			            	case "hospital":
+			            	case "hotel":
+			            	case "hut":
+			            	case "mosque":
+			            	case "school":
+			            	case "shed":
+			            	case "stable":
+			            	case "storage_tank":
+			            	case "supermarket":
+			            	case "university":
+			            	case "warehouse":
 		            		// this custom value is probably better than BAG, so retain value
-		            		if (buildingValueTag.equals(BagUtils.CONSTRUCTION))
-		            		{
-		            			// promote construction value to building
-		            			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.CONSTRUCTION)));
-		            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.CONSTRUCTION)));
-		            		}
-		            		else
-		            		{
-		            			// use existing value
-		            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.BUILDING)));
-		            		}
-		            		break;
-		            	default:
-		            		// use new value
-	            			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, newPrimitive.get(BagUtils.BUILDING)));
-		            		break;
-	            	}
+			            		if (buildingValueTag.equals(BagUtils.CONSTRUCTION))
+			            		{
+			            			// promote construction value to building
+			            			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.CONSTRUCTION)));
+			            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.CONSTRUCTION)));
+			            		}
+			            		else
+			            		{
+			            			// use existing value
+			            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.BUILDING)));
+			            		}
+			            		break;
+			            	default:
+			            		// use new value
+		            			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, newPrimitive.get(BagUtils.BUILDING)));
+			            		break;
+		            	}
+        			}
         		}
             }
             

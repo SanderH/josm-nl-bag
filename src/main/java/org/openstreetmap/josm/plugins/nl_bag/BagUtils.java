@@ -16,6 +16,7 @@ public class BagUtils {
     public final static String START_DATE = "start_date";
     public final static String LANDUSE = "landuse";
     public final static String NOTE_BAG = "note:bag";
+    public final static String YES = "yes";
 
     public final static String CONSTRUCTION = "construction";
     public final static String STATIC_CARAVAN = "static_caravan";
