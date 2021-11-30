@@ -1,4 +1,10 @@
 
+2021-11-30  0.8
+*Fix:   Also replace old value if old value is: yes
+
+2020-11-29  0.7
+*Fix:   Replace old value with BAG if old is: house, apartments, office, industrial or retail
+
 2019-08-18  0.6
 *Fix:   Don't offer to fix static_caravan and note:BAG
 
