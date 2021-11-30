@@ -323,6 +323,7 @@ public class DuplicateBag extends Test {
 			            			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(BagUtils.BUILDING)));
 			            		}
 			            		break;
+			            	case "yes":
 			            	case "house":
 			            	case "apartments":
 			            	case "office":
