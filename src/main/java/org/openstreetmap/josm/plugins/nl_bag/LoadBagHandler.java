@@ -90,7 +90,7 @@ public class LoadBagHandler extends RequestHandler {
 
     @Override
     public String[] getUsageExamples() {
-        return getUsageExamples(myCommand);
+        return new String[] {"/load_and_zoom?left=5.4980045&top=52.3603626&right=5.5000045&bottom=52.3583626"};
     }
 
     @Override
@@ -229,10 +229,8 @@ public class LoadBagHandler extends RequestHandler {
 
         @SuppressWarnings("synthetic-access")
         @Override
-        protected void realRun() throws SAXException, IOException,
-        OsmTransferException {
-            DownloadRequest request = new DownloadRequest(startDate, boundary,
-                    downloadOsm, downloadOpenData);
+        protected void realRun() throws SAXException, IOException, OsmTransferException {
+            DownloadRequest request = new DownloadRequest(startDate, boundary, downloadOsm, downloadOpenData);
             downloader.run(getProgressMonitor(), request);
         }
 
