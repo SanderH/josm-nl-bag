@@ -28,13 +28,18 @@
 **
 -->
 <project name="nl_bag" default="dist" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+	<path id="maven-ant-tasks.classpath" path="tools/maven-ant-tasks-2.1.3.jar"/>
+	<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" classpathref="maven-ant-tasks.classpath"/>
+	<tstamp>
+		<format property="plugin.date" pattern="yyyy-MM-dd'T'HH:mm:ss'Z'"/>
+	</tstamp>
 	<artifact:pom id="mypom" file="pom.xml" />
 
 	<!-- enter the SVN commit message -->
 	<property name="commit.message" value="Commit message" />
 	<!-- enter the *lowest* JOSM version this plugin is currently compatible with -->
 	<property name="plugin.main.version" value="12450" />
-	<property name="plugin.class" value="org.openstreetmap.josm.plugins.nl_bag.NLBAGPlugin" />
+	<property name="plugin.class" value="org.openstreetmap.josm.plugins.nl_bag.NLBagPlugin" />
 	<property name="plugin.description" value="The nl-bag plug-in performs validation of BAG objects in The Netherlands." />
 	<property name="plugin.version" value="${mypom.version}" />
 	<property name="plugin.build.dir" value="build/deploy" />
@@ -115,7 +120,7 @@
 			<manifest>
 				<attribute name="Author" value="Sander H" />
 				<attribute name="Plugin-Class" value="${plugin.class}" />
-				<attribute name="Plugin-Date" value="${time}" />
+				<attribute name="Plugin-Date" value="${plugin.date}" />
 				<attribute name="Plugin-Description" value="${plugin.description}" />
 				<!--<attribute name="Plugin-Link" value="http://fixme.com"/>-->
 				<attribute name="Plugin-Mainversion" value="${plugin.main.version}" />
