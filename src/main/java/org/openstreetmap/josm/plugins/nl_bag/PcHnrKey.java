@@ -1,4 +1,4 @@
-package org.openstreetmap.josm.plugins.nl_addresses;
+package org.openstreetmap.josm.plugins.nl_bag;
 
 import java.util.Objects;
 

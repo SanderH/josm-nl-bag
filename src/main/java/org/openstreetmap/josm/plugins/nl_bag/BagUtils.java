@@ -36,6 +36,7 @@ public class BagUtils {
     }
     
     public static String normalizeRefBag(String rb) {
+    	// add leading 0's which were previously removed
         return rb == null ? null : StringUtils.leftPad(rb, 16, "0");
     }
     

@@ -248,19 +248,38 @@ public class DuplicateBag extends Test {
             	}
             }
             
-            // cleanup construction tag if needed
+            // try to migrate construction tag
         	String buildingValueTag = BagUtils.BUILDING;
             if (BagUtils.isConstruction(originalPrimitive) && !BagUtils.isConstruction(newPrimitive))
             {
-            	// remove tag
-            	commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.CONSTRUCTION, null));
-            	
             	// set property source for next test
         		buildingValueTag = BagUtils.CONSTRUCTION;
+        		
+        		switch(originalPrimitive.get(buildingValueTag))
+        		{
+	        		case "yes":
+	            	case "house":
+	            	case "apartments":
+	            	case "office":
+	            	case "industrial":
+	            	case "retail":
+	            		// one of the default BAG values, just take the new value
+	        			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, newPrimitive.get(BagUtils.BUILDING)));
+	        			break;
+	        		default:
+	        			// possibly a custom value, retain the value
+	        			commands.add(new ChangePropertyCommand(newPrimitive, BagUtils.BUILDING, originalPrimitive.get(buildingValueTag)));
+	        			commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.BUILDING, originalPrimitive.get(buildingValueTag)));
+	        			break;
+        		}
+        		
+        		// remove construction
+        		commands.add(new ChangePropertyCommand(originalPrimitive, BagUtils.CONSTRUCTION, null));
+        		
             }
             
             // fix (retain/update) building tag
-            if (isBuilding(originalPrimitive) && isBuilding(newPrimitive))
+            else if (isBuilding(originalPrimitive) && isBuilding(newPrimitive))
             {
         		if (!originalPrimitive.get(buildingValueTag).equals(newPrimitive.get(BagUtils.BUILDING)))
         		{

@@ -43,7 +43,7 @@ public class NLBagPlugin extends Plugin {
             JOptionPane.showMessageDialog(MainApplication.getMainFrame(), I18n.tr("Your NL-BAG version ({0}) is out of date.\n" +
                     "Please upgrade to the latest version: {1}", info.version, latestVersion), "Plug-in out of date", JOptionPane.WARNING_MESSAGE);
         }
-        if (info.version.equals(nextVersion)) {
+        if (!info.version.equals(latestVersion) && info.version.equals(nextVersion)) {
             isDebug = true;
         }
     }
