@@ -38,7 +38,7 @@
 	<!-- enter the SVN commit message -->
 	<property name="commit.message" value="Commit message" />
 	<!-- enter the *lowest* JOSM version this plugin is currently compatible with -->
-	<property name="plugin.main.version" value="12450" />
+	<property name="plugin.main.version" value="18746" />
 	<property name="plugin.class" value="org.openstreetmap.josm.plugins.nl_bag.NLBagPlugin" />
 	<property name="plugin.description" value="The nl-bag plug-in performs validation of BAG objects in The Netherlands." />
 	<property name="plugin.version" value="${mypom.version}" />
